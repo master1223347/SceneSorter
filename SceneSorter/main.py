@@ -1,17 +1,24 @@
 import os
 import re
 
-def split_scenes_grouped_fixed(input_file, output_base="Scenes"):
+def split_scenes_with_offset(input_file, output_base="Scenes", offset=0):
     os.makedirs(output_base, exist_ok=True)
 
-    # Regex to capture: <!-- Scene 10.1 --> or <!-- Scene 10.1 JSON -->
-    scene_pattern = re.compile(r'<!--\s*Scene\s+([0-9.]+)(?:\s+(json))?\s*-->', re.IGNORECASE)
+    scene_pattern = re.compile(r'<!--\s*Scene\s+([0-9]+)(?:\.([0-9]+))?(?:\s+(json))?\s*-->', re.IGNORECASE)
 
     current_scene = None
     current_type = None
     buffer = []
 
+    def offset_scene_name(major_str, minor_str):
+        major_num = int(major_str) + offset
+        if minor_str:
+            return f"{major_num}.{minor_str}"
+        else:
+            return str(major_num)
+
     def save_scene(scene_name, scene_type, content):
+        # scene_name is offset version, e.g. "150.1"
         major_group = scene_name.split('.')[0]
         group_folder = os.path.join(output_base, f"Scene{major_group}")
         scene_folder = os.path.join(group_folder, f"Scene{scene_name}")
@@ -26,21 +33,22 @@ def split_scenes_grouped_fixed(input_file, output_base="Scenes"):
         for line in f:
             match = scene_pattern.match(line.strip())
             if match:
-                # If a previous block exists, save it
                 if current_scene and buffer:
                     save_scene(current_scene, current_type, buffer)
                     buffer = []
 
-                current_scene = match.group(1)
-                current_type = match.group(2).lower() if match.group(2) else "xml"
+                major_part = match.group(1)
+                minor_part = match.group(2)
+                current_type = match.group(3).lower() if match.group(3) else "xml"
+
+                current_scene = offset_scene_name(major_part, minor_part)
             elif current_scene:
                 buffer.append(line)
 
-        # Save the final buffer
         if current_scene and buffer:
             save_scene(current_scene, current_type, buffer)
 
-    print(f"Scenes correctly saved into '{output_base}' with XML and JSON split per scene.")
+    print(f"Scenes saved with offset {offset} in '{output_base}'")
 
 # Example usage
-split_scenes_grouped_fixed("scenes_input.txt")
+split_scenes_with_offset("scenes_input.txt")
