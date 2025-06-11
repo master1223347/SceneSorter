@@ -1,4 +1,5 @@
 Remember to remove the first line
+There is an offset function in the python file, this will determine what scene number you're doing and add it to the scene name. (e.g. if you're doing scenes 150.1-160.3, set the offset to 149, which will add 149 to the scene number so scene1.1 --> scene150.1)
 
 Prompt:
 
