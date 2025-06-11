@@ -1,7 +1,7 @@
 import os
 import re
 
-def split_scenes_with_offset(input_file, output_base="Scenes", offset=0):
+def split_scenes_with_offset(input_file, output_base="Scenes", offset=0): #Set offset number over here
     os.makedirs(output_base, exist_ok=True)
 
     scene_pattern = re.compile(r'<!--\s*Scene\s+([0-9]+)(?:\.([0-9]+))?(?:\s+(json))?\s*-->', re.IGNORECASE)
@@ -18,7 +18,6 @@ def split_scenes_with_offset(input_file, output_base="Scenes", offset=0):
             return str(major_num)
 
     def save_scene(scene_name, scene_type, content):
-        # scene_name is offset version, e.g. "150.1"
         major_group = scene_name.split('.')[0]
         group_folder = os.path.join(output_base, f"Scene{major_group}")
         scene_folder = os.path.join(group_folder, f"Scene{scene_name}")
